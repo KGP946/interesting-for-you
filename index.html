@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Для тебя ❤️</title>
+    <style>
+        body {
+            margin: 0;
+            font-family: 'Arial', sans-serif;
+            overflow: hidden;
+            text-align: center;
+            color: white;
+        }
+
+        /* Начальный градиентный фон */
+        .background {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            transition: background-image 1.5s ease-in-out;
+            z-index: 1;
+        }
+
+        /* Класс для режима с фотографиями */
+        .background.with-photos {
+            background-size: cover;
+            background-position: center;
+            filter: brightness(0.6);
+        }
+
+        .container {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 2;
+            width: 90%;
+            max-width: 1200px;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 40px;
+            border-radius: 20px;
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            font-size: 3em;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+            margin-bottom: 30px;
+            animation: fadeInDown 1s ease;
+        }
+
+        .subtitle {
+            font-size: 1.3em;
+            margin-bottom: 40px;
+            opacity: 0.9;
+            animation: fadeInUp 1s ease 0.3s both;
+        }
+
+        .buttons {
+            margin-top: 30px;
+            position: relative;
+            min-height: 100px;
+            animation: fadeIn 1s ease 0.6s both;
+        }
+
+        button {
+            padding: 18px 50px;
+            font-size: 22px;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            margin: 10px;
+            transition: all 0.3s ease;
+            font-weight: bold;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+
+        button:hover {
+            transform: scale(1.1);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.3);
+        }
+
+        #yes {
+            background: #ff4b5c;
+            color: white;
+            border: 2px solid #ff4b5c;
+        }
+
+        #yes:hover {
+            background: #ff3333;
+        }
+
+        #no {
+            background: transparent;
+            color: white;
+            border: 2px solid white;
+            position: relative;
+            transition: all 0.2s ease;
+        }
+
+        #no:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .counter {
+            font-size: 18px;
+            margin-top: 20px;
+            color: rgba(255,255,255,0.9);
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+            animation: fadeIn 1s ease 0.9s both;
+        }
+
+        .gallery {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 20px;
+            margin-top: 40px;
+            max-height: 70vh;
+            overflow-y: auto;
+            padding: 20px;
+        }
+
+        .gallery img {
+            width: 200px;
+            height: 200px;
+            object-fit: cover;
+            border-radius: 20px;
+            box-shadow: 0 0 20px rgba(255,255,255,0.5);
+            animation: fadeIn 1.5s ease-in-out;
+            border: 3px solid white;
+            transition: transform 0.3s ease;
+        }
+
+        .gallery img:hover {
+            transform: scale(1.1);
+            box-shadow: 0 0 30px rgba(255,255,255,0.8);
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .heart {
+            position: absolute;
+            font-size: 24px;
+            animation: float 3s linear infinite;
+            z-index: 3;
+        }
+
+        @keyframes float {
+            0% { 
+                transform: translateY(0); 
+                opacity: 1; 
+            }
+            100% { 
+                transform: translateY(-100px); 
+                opacity: 0; 
+            }
+        }
+
+        .error-message {
+            color: #ffcccc;
+            background: rgba(255,0,0,0.2);
+            padding: 10px;
+            border-radius: 10px;
+            margin-top: 10px;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="background" id="bg"></div>
+
+<div class="container" id="main">
+    <h1>🌸 С 8 Марта! 🌸</h1>
+    <div class="subtitle">Ты — самое прекрасное, что случилось в моей жизни</div>
+    <div class="buttons">
+        <button id="yes">Хочешь увидеть сюрприз? ❤️</button>
+        <button id="no">Не сейчас 💔</button>
+    </div>
+    <div class="counter" id="counter"></div>
+</div>
+
+<script>
+// Фотографии появятся ТОЛЬКО после нажатия на "Да"
+const images = [
+    "photo1.jpeg",
+    "photo2.jpeg",
+    "photo3.jpeg",
+    "photo4.jpeg",
+    "photo5.jpeg"
+];
+
+const galleryImages = [
+    "photo1.jpeg",
+    "photo2.jpeg",
+    "photo3.jpeg",
+    "photo4.jpeg",
+    "photo5.jpeg"
+];
+
+const bg = document.getElementById("bg");
+const yesBtn = document.getElementById('yes');
+const noBtn = document.getElementById('no');
+const main = document.getElementById('main');
+const counterDiv = document.getElementById('counter');
+
+let noClickCount = 0;
+const maxNoClicks = 5;
+let photosActivated = false; // Флаг: включены ли фото
+
+// Функция для проверки загрузки изображений
+function checkImage(url) {
+    return new Promise((resolve) => {
+        const img = new Image();
+        img.onload = () => resolve(true);
+        img.onerror = () => resolve(false);
+        img.src = url;
+    });
+}
+
+// Функция активации фотографий
+function activatePhotos() {
+    if (photosActivated) return; // Если уже активированы, выходим
+    
+    photosActivated = true;
+    
+    // Меняем класс фона для режима с фото
+    bg.classList.add('with-photos');
+    
+    // Запускаем слайд-шоу
+    let current = 0;
+    function changeBackground() {
+        bg.style.backgroundImage = `url('${images[current]}')`;
+        current = (current + 1) % images.length;
+    }
+    
+    // Первое фото сразу
+    changeBackground();
+    // Запускаем интервал смены
+    setInterval(changeBackground, 4000);
+}
+
+// Обработка кнопки "Да" (теперь она просто активирует фото)
+yesBtn.addEventListener('click', async () => {
+    // Активируем фото для фона
+    activatePhotos();
+    
+    // Проверяем, загружаются ли фото для галереи
+    const imageChecks = await Promise.all(galleryImages.map(url => checkImage(url)));
+    const allImagesLoaded = imageChecks.every(result => result === true);
+    
+    // Создаем HTML для галереи
+    let galleryHTML = '';
+    galleryImages.forEach((imgUrl, index) => {
+        galleryHTML += `<img src="${imgUrl}" alt="Фото ${index + 1}" loading="lazy">`;
+    });
+
+    if (!allImagesLoaded) {
+        galleryHTML += '<div class="error-message">⚠️ Не все фото найдены! Убедитесь, что файлы photo1.jpeg - photo5.jpeg лежат рядом с этим HTML файлом</div>';
+    }
+
+    // Обновляем содержимое (убираем кнопки, показываем галерею)
+    main.innerHTML = `
+        <h1 style="font-size:2.5em; margin-bottom:20px;">С 8 марта, любимая! 🌸💖</h1>
+        <p style="font-size:1.3em; margin-bottom:20px;">Вот наши 5 особенных фотографий:</p>
+        <div class="gallery">
+            ${galleryHTML}
+        </div>
+        <p style="margin-top:20px; font-size:1.2em;">Ты самая лучшая! ❤️</p>
+    `;
+});
+
+// Обработка кнопки "Нет" с логикой 5 попыток
+noBtn.addEventListener('click', () => {
+    noClickCount++;
+    
+    if (noClickCount >= maxNoClicks) {
+        // После 5 нажатий кнопка исчезает
+        noBtn.style.display = 'none';
+        counterDiv.innerHTML = '🎉 Сдаюсь! Ты победила! Нажимай скорее на кнопку сюрприза! 🎉';
+        counterDiv.style.fontSize = '20px';
+        counterDiv.style.color = '#ffd700';
+    } else {
+        // Показываем сколько осталось попыток
+        const remaining = maxNoClicks - noClickCount;
+        counterDiv.innerHTML = `Осталось попыток: ${remaining}`;
+        
+        // Кнопка убегает
+        const randomX = Math.random() * 300 - 150;
+        const randomY = Math.random() * 300 - 150;
+        noBtn.style.transform = `translate(${randomX}px, ${randomY}px)`;
+        
+        // Сообщения
+        const messages = [
+            '😊 Еще 4 попытки...',
+            '🤔 Точно нет?',
+            '😲 Подумай еще!',
+            '😭 Не ломай мне сердце!',
+            '💔 Это последний шанс!'
+        ];
+        
+        if (noClickCount <= 5) {
+            alert(messages[noClickCount - 1]);
+        }
+    }
+});
+
+// Эффект убегания при наведении
+noBtn.addEventListener('mouseover', () => {
+    if (noClickCount < maxNoClicks) {
+        const randomX = Math.random() * 200 - 100;
+        const randomY = Math.random() * 200 - 100;
+        noBtn.style.transform = `translate(${randomX}px, ${randomY}px)`;
+    }
+});
+
+noBtn.addEventListener('mouseout', () => {
+    if (noClickCount < maxNoClicks) {
+        noBtn.style.transform = 'translate(0, 0)';
+    }
+});
+
+// Падающие сердечки
+function createHeart() {
+    const heart = document.createElement('div');
+    heart.className = 'heart';
+    heart.innerHTML = '❤️';
+    heart.style.left = Math.random() * 100 + '%';
+    heart.style.top = '100%';
+    heart.style.fontSize = (Math.random() * 20 + 10) + 'px';
+    heart.style.animationDuration = (Math.random() * 2 + 2) + 's';
+    document.body.appendChild(heart);
+    
+    setTimeout(() => {
+        heart.remove();
+    }, 3000);
+}
+
+setInterval(createHeart, 500);
+</script>
+
+</body>
+</html>
